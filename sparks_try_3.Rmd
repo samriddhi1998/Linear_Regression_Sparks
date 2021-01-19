@@ -1,0 +1,71 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r}
+dim(data)
+str(data)
+summary(data)
+View(data)
+```
+```{r}
+with(data,plot(Hours,Scores,col = "red",pch = 19,cex = 1))
+```
+From the above graph it can be seen that 
+Scores have a positive relationship with no. of hours studied. 
+There is a linear pattern hence we can fit linear regression
+
+**Splitting the data into train-test set**
+```{r}
+library(caret)
+set.seed(1111)
+trainIndex = createDataPartition(data$Scores, p = .7, list = F,times = 1)
+Train = data[trainIndex , ]
+Test = data[-trainIndex , ]
+```
+
+**Fitting a linear regression model to train data**
+```{r}
+model = lm(Scores ~ Hours ,data = Train)
+summary(model)
+```
+Since p value of the model is less than 0.05, the model is significant.
+Scores do depend on no. of hours spent.
+
+```{r}
+with(data,plot(Hours,Scores,col = "red",pch = 19,cex = 1))
+abline(model,lwd = 2)
+```
+
+**Checking Assumptions**
+```{r}
+plot(model$residuals)
+```
+No pattern is visible thus the assumption of 
+independence of residuals is satisfied.
+
+```{r}
+shapiro.test(model$residuals)
+```
+H0 : follows normality
+H1 : does not follow normality
+p value is more, do not reject null Hypothesis
+
+
+**Evaluating the model**
+```{r}
+Train$pred = predict(model,Train)
+View(Train)
+
+Test$pred = predict(model,Test)
+View(Test)
+
+RMSE(Test$pred,Test$Scores)
+RMSE(Train$pred,Train$Scores)
+```
+Since the value of root mean square error of both train and test is low
+the model is a good fit
+
